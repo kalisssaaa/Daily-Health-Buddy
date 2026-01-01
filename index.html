@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -245,7 +244,7 @@
             <div class="metric-card" onclick="updateVal('steps')">
                 <i data-lucide="footprints" style="color:#3b82f6; margin-bottom:10px"></i>
                 <h4 data-lang="m_steps">Steps</h4>
-                <div class="value" id="v-steps">4890/10k</div>
+                <div class="value" id="v-steps">0/10k</div>
             </div>
             <div class="metric-card" onclick="updateVal('meals')">
                 <i data-lucide="utensils" style="color:#a855f7; margin-bottom:10px"></i>
@@ -390,19 +389,36 @@
     <div id="modal-water" class="modal">
         <div class="modal-content">
             <span onclick="closeWaterModal()" style="float:right; cursor:pointer">✕</span>
-            <h3>💧 Water Tracker</h3>
-            <div style="margin:20px 0;">
-                <label>SET TARGET HARI INI (ml)</label>
-                <input type="number" id="input-target" value="2000" onchange="setNewTarget()" style="text-align:center">
-            </div>
-            <div style="background:#f0f9ff; padding:15px; border-radius:20px; margin-bottom:20px;">
-                <div>PROGRESS SEKARANG</div>
-                <div style="font-size:24px; font-weight:bold; color:#3b82f6"><span id="modal-current-val">0</span> ml</div>
-            </div>
-            <button class="btn-primary" onclick="drinkWater()">+ MINUM 250ml</button>
-            <p id="congrats-msg" style="color:var(--primary); font-weight:bold; display:none; margin-top:10px">✨ Target Tercapai! ✨</p>
+                <h3>💧 Water Tracker</h3>
+
+    <div style="margin:20px 0;">
+        <label>SET TARGET HARI INI (ml)</label>
+        <input type="number" id="input-target" value="2000" onchange="setNewTarget()" style="text-align:center">
+    </div>
+
+    <div style="background:#f0f9ff; padding:15px; border-radius:20px; margin-bottom:20px;">
+        <div>PROGRESS SEKARANG</div>
+        <div style="font-size:24px; font-weight:bold; color:#3b82f6">
+            <span id="modal-current-val">0</span> ml
         </div>
     </div>
+
+    <!-- tombol minum -->
+    <button class="btn-primary" onclick="drinkWater()">+ MINUM 250ml</button>
+
+    <!-- tombol undo -->
+    <button class="btn-primary"
+        style="background:#e5e7eb; color:#1e293b; margin-top:10px"
+        onclick="undoWater()">
+        UNDO
+    </button>
+
+    <p id="congrats-msg"
+       style="color:var(--primary); font-weight:bold; display:none; margin-top:10px">
+       ✨ Target Tercapai! ✨
+    </p>
+</div>
+</div>
 
     <div id="stress-modal" class="modal">
         <div class="modal-content">
@@ -464,10 +480,11 @@
     // STATE
     let userStats = {
         name: "", age: 0, weight: 0, height: 0, job: "User", gender: "Male",
-        water: 0, waterTarget: 2000, stressLevel: 78, steps: 4890,
+        water: 0, waterTarget: 2000, stressLevel: 78, steps: 0,
         mealTimes: { breakfast: "07:00", lunch: "12:30", dinner: "19:00" }
     };
     let schedules = [];
+    let lastWaterAmount = 0
     let breathingInterval;
     let isTracking = false;
     let lastMag = 0;
@@ -548,10 +565,17 @@
         if(nt > 0) { userStats.waterTarget = parseInt(nt); updateWaterUI(); }
     }
     function drinkWater() {
-        playTone(1200, 0.2);
-        userStats.water += 250;
-        updateWaterUI();
-    }
+    playTone(1200, 0.2)
+    lastWaterAmount = 250
+    userStats.water += lastWaterAmount
+    updateWaterUI()
+}
+    function undoWater() {
+         if (lastWaterAmount === 0) return
+        userStats.water = Math.max(0, userStats.water - lastWaterAmount)
+        lastWaterAmount = 0
+        updateWaterUI()
+        }
     function updateWaterUI() {
         document.getElementById('v-water-current').innerText = userStats.water;
         document.getElementById('v-water-target').innerText = userStats.waterTarget;
@@ -746,6 +770,7 @@
     function logout() {
         if(confirm("Keluar?")) location.reload();
     }
+    
 </script>
 </body>
 </html>
